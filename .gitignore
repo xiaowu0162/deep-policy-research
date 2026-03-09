@@ -1,5 +1,6 @@
 # custom ignores
 reference_old_code
+temp_dev_docs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

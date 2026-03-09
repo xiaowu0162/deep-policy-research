@@ -1,0 +1,219 @@
+{
+  "source_dataset": "data/openai_moderation/category_dataframes",
+  "format": "jsonl",
+  "seed": 20260309,
+  "label_space": [
+    "APPROVED",
+    "REJECTED"
+  ],
+  "tasks": [
+    {
+      "task_id": "openai_moderation__sexual",
+      "domain_name": "Sexual",
+      "description": "Decide whether a message should be rejected for sexual content.",
+      "train_path": "sexual/train.jsonl",
+      "validation_path": "sexual/validation.jsonl",
+      "test_path": "sexual/test.jsonl",
+      "positive_target_per_train_validation_split": 10,
+      "stats": {
+        "train": {
+          "total": 20,
+          "APPROVED": 10,
+          "REJECTED": 10
+        },
+        "validation": {
+          "total": 20,
+          "APPROVED": 10,
+          "REJECTED": 10
+        },
+        "test": {
+          "total": 534,
+          "APPROVED": 317,
+          "REJECTED": 217
+        }
+      }
+    },
+    {
+      "task_id": "openai_moderation__hate",
+      "domain_name": "Hate",
+      "description": "Decide whether a message should be rejected for hateful content.",
+      "train_path": "hate/train.jsonl",
+      "validation_path": "hate/validation.jsonl",
+      "test_path": "hate/test.jsonl",
+      "positive_target_per_train_validation_split": 10,
+      "stats": {
+        "train": {
+          "total": 20,
+          "APPROVED": 10,
+          "REJECTED": 10
+        },
+        "validation": {
+          "total": 20,
+          "APPROVED": 10,
+          "REJECTED": 10
+        },
+        "test": {
+          "total": 459,
+          "APPROVED": 317,
+          "REJECTED": 142
+        }
+      }
+    },
+    {
+      "task_id": "openai_moderation__violence",
+      "domain_name": "Violence",
+      "description": "Decide whether a message should be rejected for violent content.",
+      "train_path": "violence/train.jsonl",
+      "validation_path": "violence/validation.jsonl",
+      "test_path": "violence/test.jsonl",
+      "positive_target_per_train_validation_split": 10,
+      "stats": {
+        "train": {
+          "total": 20,
+          "APPROVED": 10,
+          "REJECTED": 10
+        },
+        "validation": {
+          "total": 20,
+          "APPROVED": 10,
+          "REJECTED": 10
+        },
+        "test": {
+          "total": 391,
+          "APPROVED": 317,
+          "REJECTED": 74
+        }
+      }
+    },
+    {
+      "task_id": "openai_moderation__harassment",
+      "domain_name": "Harassment",
+      "description": "Decide whether a message should be rejected for harassment.",
+      "train_path": "harassment/train.jsonl",
+      "validation_path": "harassment/validation.jsonl",
+      "test_path": "harassment/test.jsonl",
+      "positive_target_per_train_validation_split": 10,
+      "stats": {
+        "train": {
+          "total": 20,
+          "APPROVED": 10,
+          "REJECTED": 10
+        },
+        "validation": {
+          "total": 20,
+          "APPROVED": 10,
+          "REJECTED": 10
+        },
+        "test": {
+          "total": 373,
+          "APPROVED": 317,
+          "REJECTED": 56
+        }
+      }
+    },
+    {
+      "task_id": "openai_moderation__self_harm",
+      "domain_name": "Self-Harm",
+      "description": "Decide whether a message should be rejected for self-harm content.",
+      "train_path": "self_harm/train.jsonl",
+      "validation_path": "self_harm/validation.jsonl",
+      "test_path": "self_harm/test.jsonl",
+      "positive_target_per_train_validation_split": 10,
+      "stats": {
+        "train": {
+          "total": 20,
+          "APPROVED": 10,
+          "REJECTED": 10
+        },
+        "validation": {
+          "total": 20,
+          "APPROVED": 10,
+          "REJECTED": 10
+        },
+        "test": {
+          "total": 348,
+          "APPROVED": 317,
+          "REJECTED": 31
+        }
+      }
+    },
+    {
+      "task_id": "openai_moderation__sexual_minors",
+      "domain_name": "Sexual/Minors",
+      "description": "Decide whether a message should be rejected for sexual content involving minors.",
+      "train_path": "sexual_minors/train.jsonl",
+      "validation_path": "sexual_minors/validation.jsonl",
+      "test_path": "sexual_minors/test.jsonl",
+      "positive_target_per_train_validation_split": 10,
+      "stats": {
+        "train": {
+          "total": 20,
+          "APPROVED": 10,
+          "REJECTED": 10
+        },
+        "validation": {
+          "total": 20,
+          "APPROVED": 10,
+          "REJECTED": 10
+        },
+        "test": {
+          "total": 382,
+          "APPROVED": 317,
+          "REJECTED": 65
+        }
+      }
+    },
+    {
+      "task_id": "openai_moderation__hate_threatening",
+      "domain_name": "Hate/Threatening",
+      "description": "Decide whether a message should be rejected for threatening hateful content.",
+      "train_path": "hate_threatening/train.jsonl",
+      "validation_path": "hate_threatening/validation.jsonl",
+      "test_path": "hate_threatening/test.jsonl",
+      "positive_target_per_train_validation_split": 5,
+      "stats": {
+        "train": {
+          "total": 20,
+          "APPROVED": 15,
+          "REJECTED": 5
+        },
+        "validation": {
+          "total": 20,
+          "APPROVED": 15,
+          "REJECTED": 5
+        },
+        "test": {
+          "total": 338,
+          "APPROVED": 307,
+          "REJECTED": 31
+        }
+      }
+    },
+    {
+      "task_id": "openai_moderation__violence_graphic",
+      "domain_name": "Violence/Graphic",
+      "description": "Decide whether a message should be rejected for graphic violent content.",
+      "train_path": "violence_graphic/train.jsonl",
+      "validation_path": "violence_graphic/validation.jsonl",
+      "test_path": "violence_graphic/test.jsonl",
+      "positive_target_per_train_validation_split": 5,
+      "stats": {
+        "train": {
+          "total": 20,
+          "APPROVED": 15,
+          "REJECTED": 5
+        },
+        "validation": {
+          "total": 20,
+          "APPROVED": 15,
+          "REJECTED": 5
+        },
+        "test": {
+          "total": 321,
+          "APPROVED": 307,
+          "REJECTED": 14
+        }
+      }
+    }
+  ]
+}
