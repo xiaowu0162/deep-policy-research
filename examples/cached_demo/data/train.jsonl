@@ -1,0 +1,2 @@
+{"input": "Hello there, how are you?", "label": "APPROVED"}
+{"input": "You disgusting idiot.", "label": "REJECTED"}

@@ -1,0 +1,16 @@
+{
+  "queries": {
+    "*": [
+      {
+        "snippet": "Threatening violence toward a person is abusive conduct.",
+        "title": "Threats guidance",
+        "url": "sources/threats.txt"
+      },
+      {
+        "snippet": "Targeted abusive insults and demeaning slurs are harassment.",
+        "title": "Harassment guidance",
+        "url": "sources/harassment.txt"
+      }
+    ]
+  }
+}

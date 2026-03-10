@@ -128,6 +128,17 @@ class ConfigAndDatasetTests(unittest.TestCase):
             self.assertIsNone(resolved.validation_path)
             self.assertEqual(resolved.validation_split_seed, spec["task_id"])
 
+    def test_load_task_spec_resolves_fixture_search_paths(self) -> None:
+        resolved = load_task_spec(ROOT / "examples" / "cached_demo" / "task_spec.json")
+        self.assertEqual(
+            resolved.research_search_fixture_path,
+            (ROOT / "examples" / "cached_demo" / "search_fixture.json").resolve(),
+        )
+        self.assertEqual(
+            resolved.redteam_search_fixture_path,
+            (ROOT / "examples" / "cached_demo" / "search_fixture.json").resolve(),
+        )
+
     def test_dataset_loader_derives_validation_split(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
@@ -671,6 +682,25 @@ class ResearchAndRunTests(unittest.TestCase):
             self.assertEqual(resumed_manager.root_dir, manager.root_dir)
             self.assertEqual(resumed_result.metrics, result.metrics)
             self.assertEqual(resumed_result.redteam, result.redteam)
+
+    def test_cached_demo_spec_runs_end_to_end_with_fixture_search(self) -> None:
+        spec_path = ROOT / "examples" / "cached_demo" / "task_spec.json"
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            with patch("deep_policy_research.eval.create_sync_client", side_effect=lambda config: PromptAwareFakeClient()):
+                with patch("deep_policy_research.optimize.create_sync_client", side_effect=lambda config: PromptAwareFakeClient()):
+                    with patch("deep_policy_research.research.create_sync_client", side_effect=lambda config: ResearchAwareFakeClient()):
+                        with patch("deep_policy_research.redteam.create_sync_client", side_effect=lambda config: RedteamAwareFakeClient()):
+                            manager, result = run_task_command(
+                                spec_path,
+                                output_dir=root / "runs",
+                                probe_all_models=False,
+                            )
+
+        self.assertEqual(manager.manifest.status, "completed")
+        self.assertGreater(result.research["source_count"], 0)
+        self.assertIsNotNone(result.redteam)
+        self.assertIn("validation", result.metrics)
 
     def test_run_redteam_command_bootstraps_research_when_started_from_spec(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

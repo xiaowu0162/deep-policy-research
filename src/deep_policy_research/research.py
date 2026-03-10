@@ -94,6 +94,8 @@ def resume_research_command(run_dir: str | Path) -> tuple[RunManager, ResearchRe
         validation_path=_optional_path_from_run_config(manager.run_config_path, "validation_path"),
         test_path=_optional_path_from_run_config(manager.run_config_path, "test_path"),
         initial_policy_doc_path=_optional_path_from_run_config(manager.run_config_path, "policy_doc_path"),
+        research_search_fixture_path=_optional_path_from_run_config(manager.run_config_path, "research.search.fixture_path"),
+        redteam_search_fixture_path=_optional_path_from_run_config(manager.run_config_path, "redteam.search.fixture_path"),
         validation_split_seed=_read_validation_split_seed(manager.run_config_path, default=spec.task_id),
     )
     if manager.manifest.status == "completed":
@@ -123,7 +125,7 @@ def _run_or_resume_research(
 
         research_client = create_sync_client(resolved.spec.research.model)
         search_provider = create_search_provider(
-            resolved.spec.research.search,
+            resolved.resolved_research_search(),
             cache_dir=manager.root_dir / "cache" / "search",
         )
         fetcher = create_url_fetcher(cache_dir=manager.root_dir / "cache" / "fetch")

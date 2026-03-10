@@ -10,7 +10,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from typing import Protocol
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 from urllib.request import Request, urlopen
 
 from .artifacts import ChunkRecord, SourceRecord
@@ -50,6 +50,14 @@ class CachedUrlFetcher:
         cache_path = self.cache_dir / f"{sha256(url.encode('utf-8')).hexdigest()}.json"
         if cache_path.exists():
             return FetchedDocument.from_dict(json.loads(cache_path.read_text(encoding="utf-8")))
+
+        local_path = _local_path_from_url(url)
+        if local_path is not None:
+            document = _read_local_document(local_path, url=url)
+            if document is None:
+                return None
+            cache_path.write_text(json.dumps(document.to_dict(), indent=2, sort_keys=True), encoding="utf-8")
+            return document
 
         request = Request(
             url,
@@ -226,6 +234,31 @@ def _normalize_text(text: str) -> str:
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _local_path_from_url(url: str) -> Path | None:
+    parsed = urlparse(url)
+    if parsed.scheme == "file":
+        return Path(unquote(parsed.path))
+    if parsed.scheme:
+        return None
+    path = Path(url).expanduser()
+    if path.exists():
+        return path.resolve()
+    return None
+
+
+def _read_local_document(path: Path, *, url: str) -> FetchedDocument | None:
+    if not path.is_file():
+        return None
+    decoded = path.read_text(encoding="utf-8")
+    if path.suffix.lower() in {".html", ".htm"}:
+        text = _normalize_text(_extract_text_from_html(decoded))
+    else:
+        text = _normalize_text(decoded)
+    if not text:
+        return None
+    return FetchedDocument(url=url, retrieved_at=_utc_now(), text=text)
 
 
 class _HTMLTextExtractor(HTMLParser):

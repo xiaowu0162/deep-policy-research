@@ -124,10 +124,44 @@ class SerperSearchProvider:
         return results
 
 
+class FixtureSearchProvider:
+    def __init__(self, config: SearchConfig, *, cache_dir: Path):
+        del cache_dir
+        if not config.fixture_path:
+            raise ValueError("search.fixture_path is required for provider='fixture'")
+        self.config = config
+        self.fixture_path = Path(config.fixture_path).expanduser().resolve()
+        self.payload = json.loads(self.fixture_path.read_text(encoding="utf-8"))
+
+    def search(self, query: str, *, num_results: int | None = None) -> list[SearchResult]:
+        limit = num_results or self.config.num_results
+        query_map = self.payload.get("queries", {}) if isinstance(self.payload, dict) else {}
+        raw_results = query_map.get(query) or query_map.get("*") or query_map.get("default") or []
+        results: list[SearchResult] = []
+        for rank, item in enumerate(raw_results[:limit], start=1):
+            if not isinstance(item, dict):
+                continue
+            url = _resolve_fixture_result_url(item.get("url"), base_dir=self.fixture_path.parent)
+            if not url or _should_skip_url(url):
+                continue
+            results.append(
+                SearchResult(
+                    query=query,
+                    url=url,
+                    rank=rank,
+                    title=_optional_str(item.get("title")),
+                    snippet=_optional_str(item.get("snippet")),
+                )
+            )
+        return results
+
+
 def create_search_provider(config: SearchConfig, *, cache_dir: Path) -> SearchProvider:
     provider = config.provider.strip().lower()
     if provider == "serper":
         return SerperSearchProvider(config, cache_dir=cache_dir)
+    if provider == "fixture":
+        return FixtureSearchProvider(config, cache_dir=cache_dir)
     raise ValueError(f"unsupported search provider {config.provider!r}")
 
 
@@ -159,3 +193,16 @@ def _optional_str(value: object) -> str | None:
         return None
     text = str(value).strip()
     return text or None
+
+
+def _resolve_fixture_result_url(value: object, *, base_dir: Path) -> str | None:
+    text = _optional_str(value)
+    if text is None:
+        return None
+    parsed = urlparse(text)
+    if parsed.scheme:
+        return text
+    path = (base_dir / text).resolve()
+    if not path.is_file():
+        raise FileNotFoundError(f"fixture search result path does not exist: {path}")
+    return path.as_uri()

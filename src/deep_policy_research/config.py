@@ -1,15 +1,16 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
-from .spec import TaskSpec
+from .spec import SearchConfig, TaskSpec
 
 
 SUPPORTED_DATA_FORMATS = {"json", "jsonl"}
 SUPPORTED_METRICS = {"f1"}
+SUPPORTED_SEARCH_PROVIDERS = {"fixture", "serper"}
 
 
 @dataclass(slots=True)
@@ -21,9 +22,17 @@ class ResolvedTaskSpec:
     validation_path: Path | None = None
     test_path: Path | None = None
     initial_policy_doc_path: Path | None = None
+    research_search_fixture_path: Path | None = None
+    redteam_search_fixture_path: Path | None = None
     validation_split_seed: str = ""
 
     def to_run_config_dict(self) -> dict[str, Any]:
+        research = self.spec.research.to_dict()
+        if self.research_search_fixture_path is not None:
+            research.setdefault("search", {})["fixture_path"] = str(self.research_search_fixture_path)
+        redteam = self.spec.redteam.to_dict()
+        if self.redteam_search_fixture_path is not None:
+            redteam.setdefault("search", {})["fixture_path"] = str(self.redteam_search_fixture_path)
         return {
             "version": self.spec.version,
             "task_id": self.spec.task_id,
@@ -46,11 +55,17 @@ class ResolvedTaskSpec:
                 "redteam": self.spec.redteam.model.to_dict(),
                 "reader": self.spec.optimize.reader_model.to_dict(),
             },
-            "research": self.spec.research.to_dict(),
-            "redteam": self.spec.redteam.to_dict(),
+            "research": research,
+            "redteam": redteam,
             "optimize": self.spec.optimize.to_dict(),
             "evaluate": self.spec.evaluate.to_dict(),
         }
+
+    def resolved_research_search(self) -> SearchConfig:
+        return _resolved_search_config(self.spec.research.search, self.research_search_fixture_path)
+
+    def resolved_redteam_search(self) -> SearchConfig:
+        return _resolved_search_config(self.spec.redteam.search, self.redteam_search_fixture_path)
 
 
 def load_task_spec(path: str | Path) -> ResolvedTaskSpec:
@@ -74,6 +89,16 @@ def load_task_spec(path: str | Path) -> ResolvedTaskSpec:
             spec.inputs.initial_policy.policy_doc_path,
             source_spec_dir,
             "policy_doc_path",
+        ),
+        research_search_fixture_path=_resolve_optional_path(
+            spec.research.search.fixture_path,
+            source_spec_dir,
+            "research.search.fixture_path",
+        ),
+        redteam_search_fixture_path=_resolve_optional_path(
+            spec.redteam.search.fixture_path,
+            source_spec_dir,
+            "redteam.search.fixture_path",
         ),
         validation_split_seed=spec.task_id,
     )
@@ -118,6 +143,14 @@ def _validate_task_spec(spec: TaskSpec) -> None:
     if not 0 < train_ratio < 1:
         raise ValueError("inputs.data.bootstrap_train_ratio must be between 0 and 1")
 
+    for stage_name, search in [("research", spec.research.search), ("redteam", spec.redteam.search)]:
+        provider = search.provider.strip().lower()
+        if provider not in SUPPORTED_SEARCH_PROVIDERS:
+            supported = ", ".join(sorted(SUPPORTED_SEARCH_PROVIDERS))
+            raise ValueError(f"unsupported {stage_name}.search.provider: {search.provider!r}; expected one of {supported}")
+        if provider == "fixture" and not search.fixture_path:
+            raise ValueError(f"{stage_name}.search.fixture_path is required when provider='fixture'")
+
 
 def _resolve_optional_path(value: str | None, base_dir: Path, field_name: str) -> Path | None:
     if value is None:
@@ -132,3 +165,9 @@ def _resolve_optional_path(value: str | None, base_dir: Path, field_name: str) -
     if not path.is_file():
         raise ValueError(f"{field_name} must point to a file: {path}")
     return path
+
+
+def _resolved_search_config(config: SearchConfig, fixture_path: Path | None) -> SearchConfig:
+    if fixture_path is None:
+        return config
+    return replace(config, fixture_path=str(fixture_path))

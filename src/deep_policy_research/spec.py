@@ -48,6 +48,7 @@ class SearchConfig:
     num_results: int = 10
     country: str = "us"
     language: str = "en"
+    fixture_path: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return drop_nones(self)
@@ -60,6 +61,7 @@ class SearchConfig:
             num_results=data.get("num_results", 10),
             country=data.get("country", "us"),
             language=data.get("language", "en"),
+            fixture_path=data.get("fixture_path"),
         )
 
 

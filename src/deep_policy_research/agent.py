@@ -134,6 +134,8 @@ def _load_resolved_spec_from_run(manager: RunManager) -> ResolvedTaskSpec:
         validation_path=_optional_path_from_run_config(manager.run_config_path, "validation_path"),
         test_path=_optional_path_from_run_config(manager.run_config_path, "test_path"),
         initial_policy_doc_path=_optional_path_from_run_config(manager.run_config_path, "policy_doc_path"),
+        research_search_fixture_path=_optional_path_from_run_config(manager.run_config_path, "research.search.fixture_path"),
+        redteam_search_fixture_path=_optional_path_from_run_config(manager.run_config_path, "redteam.search.fixture_path"),
         validation_split_seed=_read_validation_split_seed(manager.run_config_path, default=spec.task_id),
     )
 

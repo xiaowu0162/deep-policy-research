@@ -90,6 +90,8 @@ def resume_redteam_command(run_dir: str | Path) -> tuple[RunManager, RedteamResu
         validation_path=_optional_path_from_run_config(manager.run_config_path, "validation_path"),
         test_path=_optional_path_from_run_config(manager.run_config_path, "test_path"),
         initial_policy_doc_path=_optional_path_from_run_config(manager.run_config_path, "policy_doc_path"),
+        research_search_fixture_path=_optional_path_from_run_config(manager.run_config_path, "research.search.fixture_path"),
+        redteam_search_fixture_path=_optional_path_from_run_config(manager.run_config_path, "redteam.search.fixture_path"),
         validation_split_seed=_read_validation_split_seed(manager.run_config_path, default=spec.task_id),
     )
     return _run_or_resume_redteam_entrypoint(manager, resolved, probe_all_models=False)

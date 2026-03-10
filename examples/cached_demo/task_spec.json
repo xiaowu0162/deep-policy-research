@@ -1,0 +1,79 @@
+{
+  "domain": {
+    "description": "Decide whether a message should be approved or rejected under a harassment and threats moderation policy.",
+    "name": "Cached Harassment Demo"
+  },
+  "evaluate": {
+    "label_space": [
+      "APPROVED",
+      "REJECTED"
+    ],
+    "metrics": [
+      {
+        "name": "f1"
+      }
+    ],
+    "task_type": "classification"
+  },
+  "inputs": {
+    "data": {
+      "bootstrap_train_ratio": 0.8,
+      "format": "jsonl",
+      "test_path": "data/test.jsonl",
+      "train_path": "data/train.jsonl",
+      "validation_path": "data/validation.jsonl"
+    },
+    "initial_policy": {}
+  },
+  "optimize": {
+    "acceptance_metric": "f1",
+    "acceptance_split": "validation",
+    "reader_model": {
+      "api_key_env": "OPENAI_API_KEY",
+      "base_url": "http://localhost:8223/v1",
+      "client_kwargs": {},
+      "model": "Qwen/Qwen3.5-9B",
+      "request_defaults": {}
+    }
+  },
+  "redteam": {
+    "model": {
+      "api_key_env": "OPENAI_API_KEY",
+      "base_url": "http://localhost:8223/v1",
+      "client_kwargs": {},
+      "model": "Qwen/Qwen3.5-9B",
+      "request_defaults": {}
+    },
+    "search": {
+      "api_key_env": "SERPER_API_KEY",
+      "country": "us",
+      "fixture_path": "search_fixture.json",
+      "language": "en",
+      "num_results": 10,
+      "provider": "fixture"
+    }
+  },
+  "research": {
+    "iterations_per_round": 1,
+    "max_rounds": 1,
+    "model": {
+      "api_key_env": "OPENAI_API_KEY",
+      "base_url": "http://localhost:8223/v1",
+      "client_kwargs": {},
+      "model": "Qwen/Qwen3.5-9B",
+      "request_defaults": {}
+    },
+    "pages_per_query": 2,
+    "queries_per_iteration": 2,
+    "search": {
+      "api_key_env": "SERPER_API_KEY",
+      "country": "us",
+      "fixture_path": "search_fixture.json",
+      "language": "en",
+      "num_results": 10,
+      "provider": "fixture"
+    }
+  },
+  "task_id": "cached_demo__harassment",
+  "version": "0.1"
+}

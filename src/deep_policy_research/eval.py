@@ -70,6 +70,8 @@ def resume_eval_command(run_dir: str | Path) -> tuple[RunManager, MetricsArtifac
         validation_path=_optional_path_from_run_config(manager.run_config_path, "validation_path"),
         test_path=_optional_path_from_run_config(manager.run_config_path, "test_path"),
         initial_policy_doc_path=_optional_path_from_run_config(manager.run_config_path, "policy_doc_path"),
+        research_search_fixture_path=_optional_path_from_run_config(manager.run_config_path, "research.search.fixture_path"),
+        redteam_search_fixture_path=_optional_path_from_run_config(manager.run_config_path, "redteam.search.fixture_path"),
         validation_split_seed=_read_validation_split_seed(manager.run_config_path, default=spec.task_id),
     )
     return _run_or_resume_eval(manager, resolved, probe_all_models=False)
@@ -323,6 +325,10 @@ def _optional_path_from_run_config(run_config_path: Path, key: str) -> Path | No
         config = json.load(handle)
     if key == "policy_doc_path":
         value = config["initial_policy"].get("policy_doc_path")
+    elif key.startswith("research."):
+        value = _get_nested_value(config.get("research", {}), key.split(".")[1:])
+    elif key.startswith("redteam."):
+        value = _get_nested_value(config.get("redteam", {}), key.split(".")[1:])
     else:
         value = config["data"].get(key)
     return Path(value) if value else None
@@ -332,3 +338,12 @@ def _read_validation_split_seed(run_config_path: Path, *, default: str) -> str:
     with run_config_path.open("r", encoding="utf-8") as handle:
         config = json.load(handle)
     return config.get("data", {}).get("validation_split_seed", default)
+
+
+def _get_nested_value(payload: dict[str, Any], keys: list[str]) -> Any:
+    current: Any = payload
+    for key in keys:
+        if not isinstance(current, dict):
+            return None
+        current = current.get(key)
+    return current
