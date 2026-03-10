@@ -37,10 +37,24 @@ class RunManifest:
     current_example_pool_version: str | None = None
     current_prompt_version: str | None = None
     current_metrics_version: str | None = None
+    current_research_version: str | None = None
+    current_prompt_optimization_version: str | None = None
+    current_redteam_version: str | None = None
+    current_sources_version: str | None = None
+    current_chunks_version: str | None = None
+    current_candidate_rules_version: str | None = None
+    current_filtered_rules_version: str | None = None
     policy_versions: list[ArtifactVersion] = field(default_factory=list)
     example_pool_versions: list[ArtifactVersion] = field(default_factory=list)
     prompt_versions: list[ArtifactVersion] = field(default_factory=list)
     metrics_versions: list[ArtifactVersion] = field(default_factory=list)
+    research_versions: list[ArtifactVersion] = field(default_factory=list)
+    prompt_optimization_versions: list[ArtifactVersion] = field(default_factory=list)
+    redteam_versions: list[ArtifactVersion] = field(default_factory=list)
+    sources_versions: list[ArtifactVersion] = field(default_factory=list)
+    chunks_versions: list[ArtifactVersion] = field(default_factory=list)
+    candidate_rules_versions: list[ArtifactVersion] = field(default_factory=list)
+    filtered_rules_versions: list[ArtifactVersion] = field(default_factory=list)
 
     def validate(self) -> None:
         if self.status not in {"running", "completed", "failed", "interrupted"}:
@@ -69,10 +83,30 @@ class RunManifest:
             current_example_pool_version=data.get("current_example_pool_version"),
             current_prompt_version=data.get("current_prompt_version"),
             current_metrics_version=data.get("current_metrics_version"),
+            current_research_version=data.get("current_research_version"),
+            current_prompt_optimization_version=data.get("current_prompt_optimization_version"),
+            current_redteam_version=data.get("current_redteam_version"),
+            current_sources_version=data.get("current_sources_version"),
+            current_chunks_version=data.get("current_chunks_version"),
+            current_candidate_rules_version=data.get("current_candidate_rules_version"),
+            current_filtered_rules_version=data.get("current_filtered_rules_version"),
             policy_versions=[ArtifactVersion.from_dict(item) for item in data.get("policy_versions", [])],
             example_pool_versions=[ArtifactVersion.from_dict(item) for item in data.get("example_pool_versions", [])],
             prompt_versions=[ArtifactVersion.from_dict(item) for item in data.get("prompt_versions", [])],
             metrics_versions=[ArtifactVersion.from_dict(item) for item in data.get("metrics_versions", [])],
+            research_versions=[ArtifactVersion.from_dict(item) for item in data.get("research_versions", [])],
+            prompt_optimization_versions=[
+                ArtifactVersion.from_dict(item) for item in data.get("prompt_optimization_versions", [])
+            ],
+            redteam_versions=[ArtifactVersion.from_dict(item) for item in data.get("redteam_versions", [])],
+            sources_versions=[ArtifactVersion.from_dict(item) for item in data.get("sources_versions", [])],
+            chunks_versions=[ArtifactVersion.from_dict(item) for item in data.get("chunks_versions", [])],
+            candidate_rules_versions=[
+                ArtifactVersion.from_dict(item) for item in data.get("candidate_rules_versions", [])
+            ],
+            filtered_rules_versions=[
+                ArtifactVersion.from_dict(item) for item in data.get("filtered_rules_versions", [])
+            ],
         )
         value.validate()
         return value
@@ -181,6 +215,156 @@ class MetricsArtifact:
             example_pool_version="run_20260309_120000__example_pool__001",
             prompt_version="run_20260309_120000__reader_prompts__001",
             splits={"validation": SplitMetrics(n_examples=12, metrics={"f1": 0.75})},
+        )
+
+
+@dataclass(slots=True)
+class PromptOptimizationArtifact:
+    version: str
+    acceptance_split: str
+    acceptance_metric: str
+    baseline_score: float
+    best_score: float
+    improved: bool
+    baseline_prompt_version: str
+    best_prompt_version: str
+    best_metrics_version: str
+    candidate_prompt_versions: list[str]
+
+    def to_dict(self) -> dict[str, Any]:
+        return drop_nones(self)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "PromptOptimizationArtifact":
+        return cls(
+            version=data["version"],
+            acceptance_split=data["acceptance_split"],
+            acceptance_metric=data["acceptance_metric"],
+            baseline_score=data["baseline_score"],
+            best_score=data["best_score"],
+            improved=data["improved"],
+            baseline_prompt_version=data["baseline_prompt_version"],
+            best_prompt_version=data["best_prompt_version"],
+            best_metrics_version=data["best_metrics_version"],
+            candidate_prompt_versions=list(data.get("candidate_prompt_versions", [])),
+        )
+
+    @classmethod
+    def sample(cls) -> "PromptOptimizationArtifact":
+        return cls(
+            version="run_20260309_120000__prompt_optimization__001",
+            acceptance_split="validation",
+            acceptance_metric="f1",
+            baseline_score=0.75,
+            best_score=0.83,
+            improved=True,
+            baseline_prompt_version="run_20260309_120000__reader_prompts__001",
+            best_prompt_version="run_20260309_120000__reader_prompts__003",
+            best_metrics_version="run_20260309_120000__metrics__004",
+            candidate_prompt_versions=[
+                "run_20260309_120000__reader_prompts__002",
+                "run_20260309_120000__reader_prompts__003",
+            ],
+        )
+
+
+@dataclass(slots=True)
+class ResearchArtifact:
+    version: str
+    completed_iterations: int
+    query_count: int
+    source_count: int
+    chunk_count: int
+    candidate_rule_count: int
+    filtered_rule_count: int
+    policy_version: str
+    sources_version: str | None
+    chunks_version: str | None
+    candidate_rules_version: str | None
+    filtered_rules_version: str | None
+
+    def to_dict(self) -> dict[str, Any]:
+        return drop_nones(self)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ResearchArtifact":
+        return cls(
+            version=data["version"],
+            completed_iterations=data["completed_iterations"],
+            query_count=data["query_count"],
+            source_count=data["source_count"],
+            chunk_count=data["chunk_count"],
+            candidate_rule_count=data["candidate_rule_count"],
+            filtered_rule_count=data["filtered_rule_count"],
+            policy_version=data["policy_version"],
+            sources_version=data.get("sources_version"),
+            chunks_version=data.get("chunks_version"),
+            candidate_rules_version=data.get("candidate_rules_version"),
+            filtered_rules_version=data.get("filtered_rules_version"),
+        )
+
+    @classmethod
+    def sample(cls) -> "ResearchArtifact":
+        return cls(
+            version="run_20260309_120000__research__001",
+            completed_iterations=1,
+            query_count=2,
+            source_count=4,
+            chunk_count=6,
+            candidate_rule_count=5,
+            filtered_rule_count=3,
+            policy_version="run_20260309_120000__policy__002",
+            sources_version="run_20260309_120000__sources__001",
+            chunks_version="run_20260309_120000__chunks__001",
+            candidate_rules_version="run_20260309_120000__candidate_rules__001",
+            filtered_rules_version="run_20260309_120000__filtered_rules__001",
+        )
+
+
+@dataclass(slots=True)
+class RedteamArtifact:
+    version: str
+    policy_version: str
+    prompt_version: str
+    starting_example_pool_version: str
+    ending_example_pool_version: str
+    generated_candidate_count: int
+    accepted_example_count: int
+    rejected_example_count: int
+    accepted_example_ids: list[str]
+    bootstrap_applied: bool
+
+    def to_dict(self) -> dict[str, Any]:
+        return drop_nones(self)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "RedteamArtifact":
+        return cls(
+            version=data["version"],
+            policy_version=data["policy_version"],
+            prompt_version=data["prompt_version"],
+            starting_example_pool_version=data["starting_example_pool_version"],
+            ending_example_pool_version=data["ending_example_pool_version"],
+            generated_candidate_count=data["generated_candidate_count"],
+            accepted_example_count=data["accepted_example_count"],
+            rejected_example_count=data["rejected_example_count"],
+            accepted_example_ids=list(data.get("accepted_example_ids", [])),
+            bootstrap_applied=data["bootstrap_applied"],
+        )
+
+    @classmethod
+    def sample(cls) -> "RedteamArtifact":
+        return cls(
+            version="run_20260309_120000__redteam__001",
+            policy_version="run_20260309_120000__policy__002",
+            prompt_version="run_20260309_120000__reader_prompts__001",
+            starting_example_pool_version="run_20260309_120000__example_pool__001",
+            ending_example_pool_version="run_20260309_120000__example_pool__002",
+            generated_candidate_count=6,
+            accepted_example_count=3,
+            rejected_example_count=3,
+            accepted_example_ids=["ex_1001", "ex_1002", "ex_1003"],
+            bootstrap_applied=True,
         )
 
 

@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
 authors = [{ name = "OpenAI Codex" }]
-dependencies = []
+dependencies = ["openai>=2,<3"]
 
 [project.scripts]
 dpr = "deep_policy_research.cli:main"
